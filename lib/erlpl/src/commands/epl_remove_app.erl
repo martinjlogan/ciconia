@@ -15,7 +15,7 @@
 -module(epl_remove_app).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 
@@ -37,23 +37,23 @@ run(AppName, Options) ->
     AppVsns = get_app_vsns(AppName, RootDir, Options),
     handle_remove_apps(RootDir, AppName, AppVsns, Options).
 
-error(_Error) ->
-    "who knows what happened?~n".
-
 description() ->
     "remove an application package".
 
 -spec spec() -> get_opts_spec().
 spec() ->
     CmdLnTail = "<pkg_dir>",
-    OptionsTail = [{"pkg_dir", "path to the application package to be removed"}],
+    OptionsTail =
+	[{"pkg_dir", "path to the application package to be removed"}],
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,               HelpMsg}
-	 {verbose,    $v,  "verbose",     undefined,                "Verbose output"},
-	 {root_dir,    $d,  "root_dir",     string,                "The root dir where Erlang is installed"},
-	 {version,     $n,  "version",      string,                "App version number"},
-	 {force,       $f,  "force",        {atom, false},         "Forces the command to run and eliminates all prompts"}
+	 {verbose, $v,"verbose", undefined, "Verbose output"},
+	 {root_dir, $d,  "root_dir", string,
+	  "The root dir where Erlang is installed"},
+	 {version, $n,  "version",      string, "App version number"},
+	 {force, $f,  "force", {atom, false},
+	  "Forces the command to run and eliminates all prompts"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 

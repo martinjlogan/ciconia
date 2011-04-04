@@ -26,7 +26,9 @@ driver(Options) ->
 %% Convert a repo type into a driver name.
 -spec repo_type_to_driver(atom()) -> atom().
 repo_type_to_driver(undefined) ->
-    ep_couchdb_driver;
+    throw(?UEX(missing_repo_type,
+	       "repo type must be defined with the -a option",
+	       []));
 repo_type_to_driver(Name) ->
     list_to_atom(atom_to_list(Name) ++ "_driver").
     

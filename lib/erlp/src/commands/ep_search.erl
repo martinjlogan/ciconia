@@ -15,7 +15,7 @@
 -module(ep_search).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 -export([print_installed/1]).
 
 -include("erlpl.hrl").
@@ -41,14 +41,10 @@ run(SearchTerm, Options) ->
 	    text ->
 		ep_cache:fetch(SearchTerm, Options);
 	    regexp ->
-		throw(?UEX(unimplemented, "regexp search is not yet implemented", []))
+		throw(?UEX(unimplemented,
+			   "regexp search is not yet implemented", []))
 	end,
     io:format("results ~p~n", [Results]).
-    
-
-
-error(_Error) ->
-    "who knows what happened?~n".
 
 description() ->
     "list packages".
@@ -60,10 +56,9 @@ spec() ->
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,           HelpMsg}
-	 %{repo_type, $a,      "repo_type",  string,
-	 % "specifiy the repo type here. \"faxien\" | \"dav\" | \"couchdb\" | \"agner\""},
-	 {type,   $t,      "type",      {atom, text},  "Option for verbose output: text or regexp"},
-	 {verbose, $v,      "verbose",      undefined,  "Option for verbose output"}
+	 {type, $t, "type", {atom, text},
+	  "Option for verbose output: text or regexp"},
+	 {verbose, $v, "verbose", undefined,  "Option for verbose output"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 
@@ -73,7 +68,8 @@ spec() ->
 %%--------------------------------------------------------------------
 print_installed(NameVsnPairs) ->
     NameVsnsPairs = collect_dups(sort_name_and_vsn_pairs(NameVsnPairs)),
-    L1 = [{Name,format_vsns(lists:reverse(Vsns))} || {Name, Vsns} <- NameVsnsPairs],
+    L1 = [{Name,format_vsns(lists:reverse(Vsns))} ||
+	     {Name, Vsns} <- NameVsnsPairs],
     Col = lists:foldr(fun ({A,_B},Max) when length(A)>Max ->
 			      length(A);
 			  (_, Max) ->
@@ -85,7 +81,8 @@ print_installed(NameVsnPairs) ->
 %%%---------------------------------------------------------
 %%% Internal Functions
 %%%---------------------------------------------------------
-pretty_print_app(App, Rel, RootDir) when App =:= true; App =:= undefined andalso Rel =:= undefined ->
+pretty_print_app(App, Rel, RootDir)
+  when App =:= true; App =:= undefined andalso Rel =:= undefined ->
     ?INFO("~nApplications Installed:~n", []),
     ?INFO("-----------------------~n", []),
     NameVsnPairs = list_name_and_vsn_dir(epl_installed_paths:lib_dir(RootDir)),
@@ -93,10 +90,12 @@ pretty_print_app(App, Rel, RootDir) when App =:= true; App =:= undefined andalso
 pretty_print_app(_App, _Rel, _RootDir) ->
     ok.
     
-pretty_print_release(App, Rel, RootDir) when Rel =:= true; App =:= undefined andalso Rel =:= undefined ->
+pretty_print_release(App, Rel, RootDir)
+  when Rel =:= true; App =:= undefined andalso Rel =:= undefined ->
     ?INFO("~nReleases Installed:~n", []),
     ?INFO("-------------------~n", []),
-    NameVsnPairs = list_name_and_vsn_dir(epl_installed_paths:releases_dir(RootDir)),
+    NameVsnPairs = list_name_and_vsn_dir(
+		     epl_installed_paths:releases_dir(RootDir)),
     print_installed(NameVsnPairs);
 pretty_print_release(_App, _Rel, _RootDir) ->
     ok.
@@ -115,20 +114,29 @@ list_name_and_vsn_dir(Dir) ->
     
 %% Return a list of name and vsn tuples
 name_and_vsn_tuples(Paths) ->
-    lists:foldl(fun(Path, Acc) ->
-			case catch epl_otp_metadata_lib:package_dir_to_name_and_vsn(Path) of
-			    {Name, Vsn} -> [{Name, Vsn}|Acc];
-			    _           -> Acc
-			end
-		end, [], Paths).
+    lists:foldl(
+      fun(Path, Acc) ->
+	      P = epl_otp_metadata_lib:package_dir_to_name_and_vsn(Path),
+	      case catch P of
+		  {Name, Vsn} -> [{Name, Vsn}|Acc];
+		  _           -> Acc
+	      end
+      end, [], Paths).
 
 
 
 format_vsns(Vsns) when length(Vsns) > 5 ->
-    SortedVsns = lists:sort(fun(V1, V2) -> ewr_util:is_version_greater(V1, V2) end, Vsns),
-    lists:flatten([ewr_util:join(lists:reverse(lists:nthtail(length(Vsns) - 5, lists:reverse(SortedVsns))), " | "), " | ..."]);
+    SortedVsns = lists:sort(fun(V1, V2) ->
+				    ewr_util:is_version_greater(V1, V2)
+			    end, Vsns),
+    lists:flatten([ewr_util:join(
+		     lists:reverse(lists:nthtail(length(Vsns) - 5,
+						 lists:reverse(SortedVsns))),
+		     " | "), " | ..."]);
 format_vsns(Vsns) ->
-    SortedVsns = lists:sort(fun(V1, V2) -> ewr_util:is_version_greater(V1, V2) end, Vsns),
+    SortedVsns = lists:sort(fun(V1, V2) ->
+				    ewr_util:is_version_greater(V1, V2)
+			    end, Vsns),
     ewr_util:join(SortedVsns, " | ").
 
 collect_dups([]) -> 

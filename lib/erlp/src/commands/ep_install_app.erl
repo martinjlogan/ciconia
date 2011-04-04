@@ -15,7 +15,7 @@
 -module(ep_install_app).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 -include("eunit.hrl").
@@ -35,9 +35,6 @@
 run(AppName, Options) ->
     install_app(AppName, Options).
 
-error(_Error) ->
-    "who knows what happened?~n".
-
 description() ->
     "Install an Erlang application package".
 
@@ -48,11 +45,13 @@ spec() ->
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,           HelpMsg}
-	 {verbose, $v,      "verbose",      undefined,         "Option for verbose output"},
-	 {root_dir,$d,      "root_dir",     string,            "The root dir for the installation"},
-	 {version, $n,      "version",      string,            "The application version number"},
-	 {force,   $f,      "force",        undefined,         "Forces the command to run and eliminates all prompts"},
-	 {timeout, $t,      "timeout",      {integer, 60000},  "The timeout value for the operation"}
+	 {verbose, $v, "verbose", undefined, "Option for verbose output"},
+	 {root_dir,$d, "root_dir", string,"The root dir for the installation"},
+	 {version, $n, "version", string, "The application version number"},
+	 {force,   $f, "force", undefined,
+	  "Forces the command to run and eliminates all prompts"},
+	 {timeout, $t, "timeout", {integer, 60000},
+	  "The timeout value for the operation"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 
@@ -60,6 +59,8 @@ spec() ->
 %%% Internal Functions
 %%%===================================================================
 install_app(AppName, Options) ->
+    epl_util:assert_option(root_dir, Options),
+    epl_util:assert_option(timeout, Options),
     AppList = ep_cache:fetch(AppName, application, Options),
     ep_install_util:ep_cache_fetch_ensure(AppName, AppList),
     AppData = select_app_to_install(AppList, Options),

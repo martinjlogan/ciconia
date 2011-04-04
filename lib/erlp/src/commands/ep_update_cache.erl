@@ -15,7 +15,7 @@
 -module(ep_update_cache).
 
 %% API
--export([run/1, error/1, spec/0, description/0]).
+-export([run/1, spec/0, description/0]).
 
 -include("erlpl.hrl").
 -include("eunit.hrl").
@@ -34,11 +34,7 @@
 %%--------------------------------------------------------------------
 run(Options) ->
     cache_package_list(Options).
-
     
-error(_Error) ->
-    "who knows what happened?~n".
-
 description() ->
     "Update the cache of packages".
 
@@ -49,11 +45,13 @@ spec() ->
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,           HelpMsg}
-	 {repo_type, $a,      "repo_type",  atom,
+	 {repo_type, $a, "repo_type", atom,
 	  "specifiy the repo type here. \"faxien\" | \"dav\" | \"couchdb\" | \"agner\""},
-	 {verbose, $v,      "verbose",      undefined,  "Option for verbose output"},
-	 {repos,   $r,      "repos",        {string, "http://repo.erlware.org/pub"},  "The repos to search"},
-	 {timeout, $t,      "timeout",      {integer, 60000},  "The timeout value for the operation"}
+	 {verbose, $v, "verbose", undefined,  "Option for verbose output"},
+	 {repos,   $r, "repos", {string, "http://repo.erlware.org/pub"},
+	  "The repos to search"},
+	 {timeout, $t, "timeout", {integer, 60000},
+	  "The timeout value for the operation"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 
@@ -62,8 +60,10 @@ spec() ->
 %%%===================================================================
 
 cache_package_list(Options) ->
+    epl_util:assert_option(repo_type, Options, spec()),
+    epl_util:assert_option(meta_dir, Options),
     Repos = epl_util:get_option(repos, Options, spec(), required),
-    Timeout = epl_util:get_option(timeout, Options, spec(), optional),
+    Timeout = epl_util:get_option(timeout, Options, spec(), required),
     Driver = ep_util:driver(Options),
     SearchCriteria = 
 	[generic_search_criteria(),

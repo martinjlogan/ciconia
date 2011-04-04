@@ -33,6 +33,7 @@
 %% @end
 %%--------------------------------------------------------------------
 run(Options) ->
+    epl_util:assert_option(meta_dir, Options),
     App     = epl_util:get_val(app, Options),
     Release = epl_util:get_val(release, Options),
     pretty_print_app(App, Release, Options),
@@ -60,19 +61,23 @@ spec() ->
 %%%---------------------------------------------------------
 %%% Internal Functions
 %%%---------------------------------------------------------
-pretty_print_app(App, Rel, Options) when App =:= true; App =:= undefined andalso Rel =:= undefined ->
+pretty_print_app(App, Rel, Options)
+  when App =:= true; App =:= undefined andalso Rel =:= undefined ->
     ?INFO("~nApplications Under Management:~n", []),
     ?INFO("------------------------------~n", []),
     Records = epl_installed_info:all_apps(Options),
-    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-  Records]);
+    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
+					    Records]);
 pretty_print_app(_App, _Rel, _Options) ->
     ok.
     
-pretty_print_release(App, Rel, Options) when Rel =:= true; App =:= undefined andalso Rel =:= undefined ->
+pretty_print_release(App, Rel, Options)
+  when Rel =:= true; App =:= undefined andalso Rel =:= undefined ->
     ?INFO("~nReleases Under Management:~n", []),
     ?INFO("--------------------------~n", []),
     Records = epl_installed_info:all_releases(Options),
-    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-  Records]);
+    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
+					    Records]);
 pretty_print_release(_App, _Rel, _Options) ->
     ok.
 

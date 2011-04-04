@@ -94,7 +94,8 @@ install_erts(RelFile, RootDir, ErtsDir) ->
 -spec install_erts(string(), string()) -> ok.
 install_erts(ErtsDir, RootDir) ->
     ?DEBUG("installing erts from ~s to ~s~n", [ErtsDir, RootDir]),
-    {"erts", ErtsVsn} = epl_otp_metadata_lib:package_dir_to_name_and_vsn(ErtsDir),
+    {"erts", ErtsVsn} =
+	epl_otp_metadata_lib:package_dir_to_name_and_vsn(ErtsDir),
     InstalledErtsDir  = epl_installed_paths:erts_dir(RootDir, ErtsVsn),
     try
 	case filelib:is_dir(InstalledErtsDir) of
@@ -104,14 +105,16 @@ install_erts(ErtsDir, RootDir) ->
 		ok;
 	    false ->
 		ok = clean_copy_dir(ErtsDir, InstalledErtsDir),
-		epl_os_specific:set_all_executable(filename:join([InstalledErtsDir, "bin"]))
+		epl_os_specific:set_all_executable(
+		  filename:join([InstalledErtsDir, "bin"]))
 	end
     catch
 	_:_ -> throw(?EX({failed_to_install_erts, ErtsDir, InstalledErtsDir}))
     end.
 
 compare_erts_vsns(InstalledErtsDir, InstalledErtsDir2) ->
-    compare_erts_vsns2(filename:basename(InstalledErtsDir), filename:basename(InstalledErtsDir2)).
+    compare_erts_vsns2(filename:basename(InstalledErtsDir),
+		       filename:basename(InstalledErtsDir2)).
 
 compare_erts_vsns2(InstalledErtsDir, InstalledErtsDir) ->
     ok;
@@ -126,7 +129,8 @@ install_config_file(_RootDir, _RelFile, undefined) ->
     ok;
 install_config_file(RootDir, RelFile, ConfigFile) ->
     InstalledRelDir = installed_rel_dir(RelFile, RootDir),
-    InstalledConfigFile = filename:join(InstalledRelDir, filename:basename(ConfigFile)),
+    InstalledConfigFile = filename:join(InstalledRelDir,
+					filename:basename(ConfigFile)),
     try
 	ok = clean_copy_file(ConfigFile, InstalledConfigFile)
     catch
@@ -137,11 +141,14 @@ install_config_file(RootDir, RelFile, ConfigFile) ->
 %%      are all the ebin paths for the apps required by the .rel file.
 %% @spec (RootDir, RelFile, EbinPaths) -> ok
 install_script_and_boot(RootDir, RelFile, EbinPaths) ->
-    [RelName, RelVsn] = epl_otp_metadata_lib:consult_rel_file([name, vsn], RelFile),
-    RelDir            = filename:dirname(RelFile),
-    InstalledRelDir   = epl_installed_paths:release_dir(RootDir, RelName, RelVsn),
-    InstalledRelFile  = epl_installed_paths:rel_file_path(RootDir, RelName, RelVsn),
-    try ewl_file:delete_dir(InstalledRelDir) catch _:_ -> throw(?EX({delete_failed, InstalledRelDir})) end,
+    [RelName, RelVsn] =
+	epl_otp_metadata_lib:consult_rel_file([name, vsn], RelFile),
+    RelDir = filename:dirname(RelFile),
+    InstalledRelDir =
+	epl_installed_paths:release_dir(RootDir, RelName, RelVsn),
+    InstalledRelFile =
+	epl_installed_paths:rel_file_path(RootDir, RelName, RelVsn),
+    epl_file:remove(InstalledRelDir, [recursive]),
     clean_copy_dir(RelDir, InstalledRelDir),
     make_script(InstalledRelFile, [local, no_module_tests, {path, EbinPaths}]).
 
@@ -162,7 +169,10 @@ make_script(RelFile, Opts) ->
 %% Returns the paths to the ebin dirs of all apps installed
 install_apps(RelFile, LibDirs, RootDir) ->
     AppSpecs = epl_otp_metadata_lib:consult_rel_file(app_specs, RelFile),
-    [filename:join(install_app_from_app_spec(AppSpec, if_string_make_list(LibDirs), RootDir), ebin) ||
+    [filename:join(
+       install_app_from_app_spec(AppSpec,
+				 if_string_make_list(LibDirs),
+				 RootDir), ebin) ||
 	AppSpec <- AppSpecs].
 	
 %% If lib dirs is only a string make it a list
@@ -173,7 +183,8 @@ if_string_make_list(LibDirs) ->
 							
 install_app_from_app_spec(AppSpec, [LibDir|T], RootDir) ->   
     try
-	InstalledAppDir = app_dir(AppSpec, epl_installed_paths:lib_dir(RootDir)),
+	InstalledAppDir =
+	    app_dir(AppSpec, epl_installed_paths:lib_dir(RootDir)),
 	case filelib:is_dir(InstalledAppDir) of
 	    true ->
 		InstalledAppDir;
@@ -197,23 +208,26 @@ app_dir(AppSpec, LibDir) ->
 extract_app_vsn_from_appspec(AppSpec) when is_tuple(AppSpec) ->
     {element(1, AppSpec), element(2, AppSpec)}.
 
-name_and_vsn(AppName, AppVsn) when is_atom(AppName) -> name_and_vsn(atom_to_list(AppName), AppVsn);
-name_and_vsn(AppName, AppVsn)                       -> AppName ++ "-" ++ AppVsn.
+name_and_vsn(AppName, AppVsn) when is_atom(AppName) ->
+    name_and_vsn(atom_to_list(AppName), AppVsn);
+name_and_vsn(AppName, AppVsn) ->
+    AppName ++ "-" ++ AppVsn.
     
 installed_rel_dir(RelFile, RootDir) ->
-    [RelName, RelVsn] = epl_otp_metadata_lib:consult_rel_file([name, vsn], RelFile),
+    [RelName, RelVsn] =
+	epl_otp_metadata_lib:consult_rel_file([name, vsn], RelFile),
     epl_installed_paths:release_dir(RootDir, RelName, RelVsn).
 
 clean_copy_dir(Dir, Dir) ->
     ?DEBUG("attempting to copy a directory to itself with ~p~n", [Dir]),
     ok;
 clean_copy_dir(Dir, DestDir) ->
-    try ewl_file:delete_dir(DestDir) catch _:_ -> throw(?EX({delete_failed, DestDir})) end,
-    try ok = ewl_file:copy_dir(Dir, DestDir) catch _:_ -> throw(?EX({copy_failed, Dir, DestDir})) end.
+    epl_file:remove(DestDir, [recursive]),
+    ewl_file:copy(Dir, DestDir, [recursive]).
 
 clean_copy_file(File, File) ->
     ?DEBUG("attempting to copy a file to itself with ~p~n", [File]),
     ok;
 clean_copy_file(File, DestFile) ->
-    try file:delete(DestFile) catch _:_ -> throw(?EX({delete_failed, DestFile})) end,
-    try ok = ewl_file:copy_file(File, DestFile) catch _:_ -> throw(?EX({copy_failed, File, DestFile})) end.
+    epl_file:remove(DestFile),
+    epl_file:copy(File, DestFile).

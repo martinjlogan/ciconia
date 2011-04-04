@@ -12,6 +12,8 @@
 	 fetch_rel_file_from_release_package/1,
 	 unpack_to_tmp_if_archive/1,
 	 copy_to_tmp/1,
+	 assert_option/2,
+	 assert_option/3,
 	 get_option/4,
 	 get_option/2,
 	 get_val/3,
@@ -68,18 +70,6 @@ unpack_to_tmp(ArtifactFilePath) ->
 	TmpArtifactPaths -> TmpArtifactPaths
     end.
 
-%% @doc if a package is a tarball then untar it into a tmp dir and
-%%      hand back the path(s) to the unpacked contents of the temp dir.
-%%      If the package is not an archive just move it to tmp
--spec unpack_to_tmp_if_archive(PackageDirPath::string()) -> DirPath::string().
-unpack_to_tmp_if_archive(FilePath) ->
-    case re:run(FilePath, ".*" ++ ?REPO_FILE_EXT_REGEXP ++ "$") of
-	{match, _} ->
-	    unpack_to_tmp(FilePath);
-	_NoMatch ->
-	    copy_to_tmp(FilePath)
-    end.
-
 %% @doc Applies a fun to all elements of a list until getting Return.
 %% <pre>
 %% This takes a fun, its expected return on 'success', and a list. The fun 
@@ -128,6 +118,23 @@ highest_vsn([]) ->
     [].
 
 
+%% Assert that an option is present.
+-spec assert_option(atom(), list()) -> ok.
+assert_option(Option, Options) -> 
+    case get_val(Option, Options) of
+	undefined ->
+	    Msg = "The option ~p is required and must be supplied.~n",
+	    throw(?UEX({missing_option, Option, Options}, Msg, [Option]));
+	_Value ->
+	    ok
+    end.
+
+%% Assert that an option is present and well formed according to cmdln specs.
+-spec assert_option(atom(), list(), tuple()) -> ok.
+assert_option(Option, Options, Spec) -> 
+    get_option(Option, Options, Spec, required),
+    ok.
+	    
 %% @doc Fetch an options value. First look in the supplied options list
 %%      and if not found check for an OS env value of the same name. 
 -spec get_option(atom(), list(), get_opts_spec(), optional | required) -> term() | undefined.
@@ -255,6 +262,18 @@ copy_to_tmp(ArtifactFilePath) ->
     TmpArtifactFilePath = ewl_file:join_paths(TmpDirPath, ArtifactFileName),
     ewl_file:copy(ArtifactFilePath, TmpArtifactFilePath, [recursive]),
     TmpArtifactFilePath.
+
+%% @doc if a package is a tarball then untar it into a tmp dir and
+%%      hand back the path(s) to the unpacked contents of the temp dir.
+%%      If the package is not an archive just move it to tmp
+-spec unpack_to_tmp_if_archive(PackageDirPath::string()) -> DirPath::string().
+unpack_to_tmp_if_archive(FilePath) ->
+    case re:run(FilePath, ".*" ++ ?REPO_FILE_EXT_REGEXP ++ "$") of
+	{match, _} ->
+	    unpack_to_tmp(FilePath);
+	_NoMatch ->
+	    copy_to_tmp(FilePath)
+    end.
 
 %%%===================================================================
 %%% Internal functions

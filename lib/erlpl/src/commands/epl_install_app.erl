@@ -15,7 +15,7 @@
 -module(epl_install_app).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 
@@ -38,9 +38,12 @@ run(RawApp, Options) ->
 	case epl_validation:app_validation(AppDir) of
 	    {error, Reason} ->
 		Msg = "Validation for ~s failed with ~p.~n" ++
-		    "Please verify that you have a well formed OTP Application~n",
+		    "Please verify that you have a well formed" ++
+		    " OTP Application~n",
 		Vars = [AppDir, Reason],
-		throw(?UEX({validation_of_app_failed, AppDir, Reason}, Msg, Vars));
+		throw(?UEX({validation_of_app_failed, AppDir, Reason},
+			   Msg,
+			   Vars));
 	    true -> 
 		epl_installed_info:add_managed_root_dir(Options),
 		handle_install_app(AppDir, Options) 
@@ -48,23 +51,22 @@ run(RawApp, Options) ->
     epl_file:remove(AppDir, [recursive]),
     Res.
 
-error(_Error) ->
-    "who knows what happened?~n".
-
 description() ->
     "install an application package".
 
 -spec spec() -> get_opts_spec().
 spec() ->
     CmdLnTail = "<pkg_dir>",
-    OptionsTail = [{"pkg_dir", "path to the application package to be installed"}],
+    OptionsTail = [{"pkg_dir",
+		    "path to the application package to be installed"}],
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,               HelpMsg}
-	 {verbose,     $v,  "verbose",     undefined,                "Verbose output"},
-	 {root_dir,    $d,  "root_dir",     string,                "The root dir for the install"},
-	 {version,     $n,  "version",      string,                "App version number"},
-	 {force,       $f,  "force",        undefined,             "Forces the command to run and eliminates all prompts"}
+	 {verbose, $v, "verbose", undefined, "Verbose output"},
+	 {root_dir, $d,  "root_dir", string, "The root dir for the install"},
+	 {version, $n,  "version", string, "App version number"},
+	 {force, $f, "force", undefined,
+	  "Forces the command to run and eliminates all prompts"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 
@@ -86,9 +88,10 @@ handle_install_app(AppDir, Options) ->
 	false ->
 	   Fun();
 	true  ->
-	    Prompt = io_lib:fwrite("Do you want to overwrite ~s-~s (y/n)?", [AppName, AppVsn]), 
+	    Prompt = io_lib:fwrite("Do you want to overwrite ~s-~s (y/n)?",
+				   [AppName, AppVsn]), 
 	    RespSet = ["y", "n"],
 	    SuccessSet = ["y"],
-	    epl_util:force_or_prompt_for_an_action(Prompt, RespSet, SuccessSet, Fun, Options) 
+	    epl_util:force_or_prompt_for_an_action(Prompt, RespSet,
+						   SuccessSet, Fun, Options) 
     end.
-

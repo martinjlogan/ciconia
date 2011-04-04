@@ -15,11 +15,10 @@
 -module(ep_publish).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 -include("eunit.hrl").
-
 
 %%%===================================================================
 %%% API
@@ -28,11 +27,11 @@
 %% @doc List installed packages.
 -spec run(RawPackageDir::string(), Options::list()) -> ok.
 run(RawPackageDir, Options) ->
+    epl_util:assert_option(repo_type, Options, spec()),
+    epl_util:assert_option(repos, Options, spec()),
+    epl_util:assert_option(timeout, Options),
     PackageDir = epl_util:unpack_to_tmp_if_archive(RawPackageDir),
     publish_directory(PackageDir, Options).
-
-error(_Error) ->
-    "who knows what happened?~n".
 
 description() ->
     "publish packages".

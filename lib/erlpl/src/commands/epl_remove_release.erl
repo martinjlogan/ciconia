@@ -15,7 +15,7 @@
 -module(epl_remove_release).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 
@@ -35,11 +35,8 @@ run(RelName, Options) ->
     ?DEBUG("AppName ~p Options ~p", [RelName, Options]),
     RootDir = epl_util:get_option(root_dir, Options, spec(), required),
     RelVsns = get_rel_vsns(RelName, RootDir, Options),
-    io:format("Targeting ~p with versions ~p for deletion~n", [RelName, RelVsns]),
+    ?INFO("Targeting ~p with versions ~p for deletion~n", [RelName, RelVsns]),
     handle_remove_releases(RootDir, RelName, RelVsns, Options).
-
-error(_Error) ->
-    "who knows what happened?~n".
 
 description() ->
     "remove a release".
@@ -47,14 +44,17 @@ description() ->
 -spec spec() -> get_opts_spec().
 spec() ->
     CmdLnTail = "<release_name>",
-    OptionsTail = [{"release_name", "The release name of the release to be removed."}],
+    OptionsTail =
+	[{"release_name", "The release name of the release to be removed."}],
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,               HelpMsg}
-	 {verbose,    $v,  "verbose",     undefined,                "Verbose output"},
-	 {root_dir,    $d,  "root_dir",     string,                "The root dir where Erlang code is installed"},
-	 {version,     $n,  "version",      string,                "Release version number"},
-	 {force,       $f,  "force",        {atom, false},         "Forces the command to run and eliminates all prompts"}
+	 {verbose, $v, "verbose", undefined, "Verbose output"},
+	 {root_dir, $d, "root_dir", string,
+	  "The root dir where Erlang code is installed"},
+	 {version, $n, "version", string, "Release version number"},
+	 {force, $f,  "force",        {atom, false},
+	  "Forces the command to run and eliminates all prompts"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 

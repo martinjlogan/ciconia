@@ -15,7 +15,7 @@
 -module(ep_install_erts).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 -include("eunit.hrl").
@@ -33,10 +33,9 @@
 %% @end
 %%--------------------------------------------------------------------
 run(ErtsVsn, Options) ->
+    epl_util:assert_option(root_dir, Options),
+    epl_util:assert_option(timeout, Options),
     install_erts(ErtsVsn, Options).
-
-error(_Error) ->
-    "who knows what happened?~n".
 
 description() ->
     "Install an Erlang ERTS (Erlang Runtime System) package".
@@ -48,10 +47,12 @@ spec() ->
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,           HelpMsg}
-	 {verbose, $v,      "verbose",      undefined,         "Option for verbose output"},
-	 {root_dir,$d,      "root_dir",     string,            "The root dir for the installation"},
-	 {force,   $f,      "force",        undefined,         "Forces the command to run and eliminates all prompts"},
-	 {timeout, $t,      "timeout",      {integer, 60000},  "The timeout value for the operation"}
+	 {verbose, $v, "verbose", undefined, "Option for verbose output"},
+	 {root_dir,$d, "root_dir", string,"The root dir for the installation"},
+	 {force, $f, "force", undefined,
+	  "Forces the command to run and eliminates all prompts"},
+	 {timeout, $t, "timeout", {integer, 60000},
+	  "The timeout value for the operation"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 

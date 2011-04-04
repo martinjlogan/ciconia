@@ -59,6 +59,8 @@ spec() ->
 %%% Internal Functions
 %%%===================================================================
 install_rel(RelName, Options) ->
+    epl_util:assert_option(root_dir, Options),
+    epl_util:assert_option(timeout, Options),
     RelList = ep_cache:fetch(RelName, release, Options),
     ep_install_util:ep_cache_fetch_ensure(RelName, RelList),
     RelData = select_rel_to_install(RelList, Options),
@@ -98,7 +100,7 @@ install_missing_apps(RelPackagePath, MissingApps, Options) ->
     CleanOptions = [{root_dir, RelPackagePath}|
 		    lists:delete(root_dir, lists:delete(version, Options))],
     % TODO move to using ewl_plists map
-    ec_plists:map(fun({AppName, AppVsn}) ->
+    lists:map(fun({AppName, AppVsn}) ->
 		      ?DEBUG("The release is missing app ~p at version ~p~n" ++
 			     "Installing it now~n", [AppName, AppVsn]),
 		      ep_install_app:run(atom_to_list(AppName),

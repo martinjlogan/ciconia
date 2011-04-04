@@ -15,7 +15,7 @@
 -module(epl_install_erts).
 
 %% API
--export([run/2, error/1, spec/0, description/0]).
+-export([run/2, spec/0, description/0]).
 
 -include("erlpl.hrl").
 
@@ -39,16 +39,15 @@ run(RawErts, Options) ->
 		Msg = "Validation for ~s failed with ~p.~n" ++
 		    "Please verify that you have a well formed ERTS package~n",
 		Vars = [ErtsDir, Reason],
-		throw(?UEX({validation_of_erts_failed, ErtsDir, Reason}, Msg, Vars));
+		throw(?UEX({validation_of_erts_failed, ErtsDir, Reason},
+			   Msg,
+			   Vars));
 	    true -> 
 		epl_installed_info:add_managed_root_dir(Options),
 		handle_install_erts(ErtsDir, Options) 
 	end,
     epl_file:remove(ErtsDir, [recursive]),
     Res.
-
-error(_Error) ->
-    "who knows what hertsened?~n".
 
 description() ->
     "Install an Erlang ERTS (Erlang Runtime System) package".
@@ -60,9 +59,10 @@ spec() ->
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,               HelpMsg}
-	 {verbose,     $v,  "verbose",     undefined,              "Verbose output"},
-	 {root_dir,    $d,  "root_dir",     string,                "The root dir for the install"},
-	 {force,       $f,  "force",        undefined,             "Forces the command to run and eliminates all prompts"}
+	 {verbose, $v, "verbose", undefined, "Verbose output"},
+	 {root_dir, $d, "root_dir", string, "The root dir for the install"},
+	 {force, $f, "force", undefined,
+	  "Forces the command to run and eliminates all prompts"}
 	],
     {OptionSpecs, CmdLnTail, OptionsTail}.
 
@@ -74,7 +74,8 @@ spec() ->
 
 handle_install_erts(ErtsDir, Options) ->
     RootDir  = epl_util:get_option(root_dir, Options, spec(), required),
-    {"erts", ErtsVsn} = epl_otp_metadata_lib:package_dir_to_name_and_vsn(ErtsDir),
+    {"erts", ErtsVsn} =
+	epl_otp_metadata_lib:package_dir_to_name_and_vsn(ErtsDir),
     InstalledErtsDir   = epl_installed_paths:erts_dir(RootDir, ErtsVsn),
     Fun = fun() ->
 		  epl_installed_info:write(ErtsDir, Options),

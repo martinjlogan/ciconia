@@ -14,7 +14,6 @@
 	]).
 
 -include("erlpl.hrl").
--include_lib("couchbeam/include/couchbeam.hrl").
 
 %%%===================================================================
 %%% API

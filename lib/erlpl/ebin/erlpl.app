@@ -2,7 +2,7 @@
 %% application.
 {application, erlpl, 
   [{description, "Local package management with no remote component"},
-   {vsn, "0.4.0"},
+   {vsn, "0.5.0"},
    {modules, [
 		epl_cmdln_lib,
 		epl_otp_metadata_lib,
@@ -31,6 +31,6 @@
 		epl_remove_release
               ]},
    {registered,[]},
-   {applications, [kernel, stdlib, getopt, ewrepo, erlware_commons, ewlib, mnesia]},
+   {applications, [kernel, stdlib, getopt, ewrepo, erlware_commons, ewlib]},
    {start_phases, []}]}.
 

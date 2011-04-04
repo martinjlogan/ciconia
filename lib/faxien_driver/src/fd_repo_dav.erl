@@ -2,8 +2,10 @@
 %%% @copyright Erlware 2007
 %%% @author    Martin Logan <martinjlogan@erlware.org>
 %%%
-%%% @doc This module contains all functions in ewrepo that make requests to a remote repo. *Note* this file should not
-%%%      contain any convenience functions or shortcuts.  Those should be placed in higher level modules so that this 
+%%% @doc This module contains all functions in ewrepo that make requests
+%%%      to a remote repo. *Note* this file should not
+%%%      contain any convenience functions or shortcuts.
+%%%      Those should be placed in higher level modules so that this 
 %%%      stays free of any clutter.
 %%% @end
 %%%
@@ -16,26 +18,19 @@
 %%--------------------------------------------------------------------
 	 	
 -export([
-   repo_get/2,
-   repo_put/3,
-   repo_list/2,
-   repo_mkcol/2
+	 repo_get/2,
+	 repo_put/3,
+	 repo_list/2,
+	 repo_mkcol/2
         ]).
 	 	
-
 -include("erlpl.hrl").
 -include("eunit.hrl").
 	 	
-
-	 	
 %%====================================================================
-	 	
 %% External functions
-	 	
 %%====================================================================
-	 	
 
-	 	
 %%-------------------------------------------------------------------
 %% @doc
 %%  Make the http request to fetch some data.
@@ -68,7 +63,8 @@ repo_get([$h,$t,$t,$p,$s,$:,$/,$/|_] = URL, Timeout) ->
 %% </pre>
 %% @end
 %%-------------------------------------------------------------------
--spec repo_put(URL::string(), Payload::binary(), Timeout::non_neg_integer()) -> {ok, binary()} | {error, term()}.
+-spec repo_put(URL::string(), Payload::binary(),
+	       Timeout::non_neg_integer()) -> {ok, binary()} | {error, term()}.
 repo_put([$f,$i,$l,$e,$:,$/,$/|FilePath] = FullURL, Payload, _Timeout) ->
     ewl_file:mkdir_p(filename:dirname(FilePath)),
     case file:write_file(FilePath, Payload) of
@@ -85,7 +81,8 @@ repo_put([$h,$t,$t,$p,$s,$:,$/,$/|_] = URL, Payload, Timeout) ->
 
 %%-------------------------------------------------------------------
 %% @doc
-%% Individually creates each collection required by the Path. Has the syntax of mkdir -p but over webdav.
+%% Individually creates each collection required by the Path.
+%% Has the syntax of mkdir -p but over webdav.
 %% @end
 %%-------------------------------------------------------------------
 -spec repo_mkcol(URL::string(), Timeout::non_neg_integer()) -> ok | {error, term()}.
@@ -148,7 +145,9 @@ repo_list_with_auth(URL, Timeout, AuthOpts) ->
     
 parse_out_package_versions(Body) ->
     {Elem, _} = xmerl_scan:string(Body),
-    [filename:basename(E) || E <- tl(lists:sort(xmerl_xs:value_of(xmerl_xs:select("//D:href", Elem))))].
+    [filename:basename(E) ||
+	E <- tl(lists:sort(xmerl_xs:value_of(
+			     xmerl_xs:select("//D:href", Elem))))].
 
 handle_ibrowse_return(Result, AcceptableCodes) ->
     case Result of
@@ -157,7 +156,8 @@ handle_ibrowse_return(Result, AcceptableCodes) ->
 		true -> 
 		    {ok, Payload};
 		false ->
-		    ?DEBUG("ewr_repo_dav:handle_ibrowse_return/2 -> ~p~n", [Result]),
+		    ?DEBUG("ewr_repo_dav:handle_ibrowse_return/2 -> ~p~n",
+			   [Result]),
 		    {error, {http_return_code, Code}}
 	    end;
         Error = {error, _} -> 
