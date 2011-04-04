@@ -2,7 +2,7 @@
 %% application.
 {application, erlp,
  [{description, "Remote package management. Handles pulling and publishing remote packages."},
-  {vsn, "0.2.1"},
+  {vsn, "0.3.0"},
   {modules, [
 	     ep_util,
 	     ep_help,

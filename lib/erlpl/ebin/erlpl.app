@@ -2,7 +2,7 @@
 %% application.
 {application, erlpl, 
   [{description, "Local package management with no remote component"},
-   {vsn, "0.3.0"},
+   {vsn, "0.4.0"},
    {modules, [
 		epl_cmdln_lib,
 		epl_otp_metadata_lib,
