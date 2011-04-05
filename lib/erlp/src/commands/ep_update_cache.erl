@@ -96,7 +96,8 @@ os_specific_search_criteria("Linux" = OSName) ->
 create_range(High, Low) when is_list(High), is_list(Low) ->
     "[" ++ High ++ "-" ++ Low ++ "]". 
 
-package_search_criteria(OSName, OSRelease, HardwareName, GLibC, ErtsVsn, PackageType) ->
+package_search_criteria(OSName, OSRelease, HardwareName, GLibC, 
+	                ErtsVsn, PackageType) ->
     #package_info{os_name = OSName,
 		  os_release = OSRelease,
 		  hardware_name = HardwareName,

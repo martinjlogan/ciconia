@@ -130,8 +130,6 @@ module_base_to_module(ModuleBase, Options) ->
 
 print_execution_failure_err_msg(Module, Args, Options, Exception) ->
     ?INFO("~n~n**Failure**~n", []),
-    suggest_log_level(),
-    print_usage(Module, Options),
     case Exception of
 	{uex, {CurrentFunction, Line, ActualEx, UsrMsg}} ->
 	    ?INFO("~n~n**Hint**~n~s~n~n", [UsrMsg]),
@@ -143,7 +141,9 @@ print_execution_failure_err_msg(Module, Args, Options, Exception) ->
 	Exception ->
 	    ?DEBUG("~n~n***Debug Info***~nException processed: ~p~n~nStackTrace:~p~n",
 		   [Exception, erlang:get_stacktrace()])
-    end.
+    end,
+    print_usage(Module, Options),
+    suggest_log_level(),
 
 suggest_log_level() ->
     case os:getenv("ERLP_LOG_LEVEL") of
