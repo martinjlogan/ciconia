@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_config_file_path).
+-module(epl_cmd_config_file_path).
 
 %% API
 -export([run/2, error/1, spec/0, description/0]).

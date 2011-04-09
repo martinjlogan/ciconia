@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(ep_update_cache).
+-module(ep_cmd_update_cache).
 
 %% API
 -export([run/1, spec/0, description/0]).

@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_install_release).
+-module(epl_cmd_install_release).
 
 %% API
 -export([run/2, spec/0, description/0]).

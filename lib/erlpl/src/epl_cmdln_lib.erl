@@ -86,22 +86,24 @@ parse_args([], InitialOptions) ->
 parse_args([Command|PlainArgs], InitialOptions) ->
     Module = module_base_to_module(translate_dash_to_underscore(Command),
 				   InitialOptions),
-    {OptionSpecs, _, _} = get_spec(Module),
+    {OptionSpecs, _, _} = get_spec(Module, InitialOptions),
     {Options, Args} = getopt_parse(OptionSpecs, PlainArgs),
     %% Format the repos option
     %% Args come before the options list when we apply. 
     {Module, run, Args, InitialOptions ++ format_repos_option(Options)}.
 
-get_spec(Module) ->
+get_spec(Module, Options) ->
     try
 	apply(Module, spec, [])
     catch
 	_C:_E ->
+	    Prefix = epl_util:get_option(prefix, Options),
+	    Command = remove_prefix(Prefix, Module),
 	    throw(?UEX(unknown_function,
-		       "The command you are trying to execute does not~n" ++
+		       "The command you are trying to execute ~p does not~n" ++
 		       "exist and no help can be given. Please run~n" ++
 		       "help commands for more information on all commands",
-		       []))
+		       [Command]))
     end.
 
 getopt_parse(OptionSpecs, PlainArgs) ->
@@ -133,17 +135,25 @@ print_execution_failure_err_msg(Module, Args, Options, Exception) ->
     case Exception of
 	{uex, {CurrentFunction, Line, ActualEx, UsrMsg}} ->
 	    ?INFO("~n~n**Hint**~n~s~n~n", [UsrMsg]),
-	    ?DEBUG("~n~n***Debug Info***~nException processed: in ~p ~p at ~p with~n~p~n~nStackTrace:~p~n",
-		   [CurrentFunction, Args, Line, ActualEx, erlang:get_stacktrace()]);
+	    ?DEBUG("~n~n***Debug Info***~n" ++
+		   "Exception processed: in ~p ~p at ~p with~n" ++
+		   "~p~n~nStackTrace:~p~n",
+		   [CurrentFunction, Args, Line, ActualEx,
+		    erlang:get_stacktrace()]);
 	{ex, {CurrentFunction, Line, ActualEx}} ->
-	    ?DEBUG("~n~n***Debug Info***~nException processed: in ~p ~p at ~p with~n~p~n~nStackTrace:~p~n",
-		   [CurrentFunction, Args, Line, ActualEx, erlang:get_stacktrace()]);
+	    ?DEBUG("~n~n***Debug Info***~n" ++
+		   "Exception processed: in ~p ~p at ~p with~n" ++
+		   "~p~n~nStackTrace:~p~n",
+		   [CurrentFunction, Args, Line, ActualEx,
+		    erlang:get_stacktrace()]);
 	Exception ->
-	    ?DEBUG("~n~n***Debug Info***~nException processed: ~p~n~nStackTrace:~p~n",
+	    ?DEBUG("~n~n***Debug Info***~n" +
+		   "Exception processed: ~p~n~nStackTrace:~p~n",
 		   [Exception, erlang:get_stacktrace()])
     end,
+    io:format("*********** module ~p~n", [Module]),
     print_usage(Module, Options),
-    suggest_log_level(),
+    suggest_log_level().
 
 suggest_log_level() ->
     case os:getenv("ERLP_LOG_LEVEL") of
@@ -157,6 +167,8 @@ suggest_log_level() ->
 translate_dash_to_underscore(String) ->
     re:replace(String, "-", "_", [{return, list}, global]).
 
+remove_prefix(Prefix, CommandName) when is_atom(CommandName) ->
+    remove_prefix(Prefix, atom_to_list(CommandName));
 remove_prefix(Prefix, CommandName) ->
     try
 	Ret = re:replace(CommandName, Prefix ++ "_", "",
@@ -168,7 +180,8 @@ remove_prefix(Prefix, CommandName) ->
 	    case strip_prefix(CommandName) of
 		error ->
 		    throw(?UEX(bad_command_name,
-			       "This is an internal error - nothing you can do. Something" ++
+			       "This is an internal error - nothing you" ++
+			       " can do. Something" ++
 			       " is wrong with the command prefix ~p ~p.~n",
 			       [Prefix, CommandName]));
 		Command ->

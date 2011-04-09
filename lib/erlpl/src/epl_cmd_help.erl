@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 20 Mar 2011 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_help).
+-module(epl_cmd_help).
 
 %% API
 -export([run/1, error/1, spec/0, description/0]).
@@ -30,17 +30,12 @@ run(Options) ->
     help_commands(epl_util:get_val(commands, Options), Options).
 
 help_commands(true, _Options) ->
-    ?INFO("This command is not yet implemented. Here is a basic~n" ++
-	  "list. Run erlp help --command <command> on each for~n" ++
-	  "more info on each command.~n~n" ++
-	  "  install-release~n" ++
-	  "  install-app~n" ++
-	  "  rollback-release~n" ++
-	  "  remove-release~n" ++
-	  "  dump-db~n" ++
-	  "  manage-root-dir~n" ++
-	  "  config-file-path~n" ++
-	  "  help~n~n", []);
+    SrcDirStar =
+	filename:join([filename:dirname(code:priv_dir(erlpl)),
+		       "src",
+		       "epl_cmd_*"]),
+    CommandModPaths = filelib:wildcard(SrcDirStar),
+    ?INFO("command paths ~p~n", [CommandModPaths]);
 help_commands(_False, Options) ->
     help_command(epl_util:get_val(command, Options), Options).
 

@@ -4,7 +4,7 @@
 %%%  Point this at a root dir to bring it under erlpl management.
 %%% @end
 %%% Created : 20 Mar 2011 by Martin Logan <martinjlogan@Macintosh.local>
--module(epl_manage_root_dir).
+-module(epl_cmd_manage_root_dir).
 
 
 

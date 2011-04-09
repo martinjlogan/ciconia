@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(ep_publish).
+-module(ep_cmd_publish).
 
 %% API
 -export([run/2, spec/0, description/0]).

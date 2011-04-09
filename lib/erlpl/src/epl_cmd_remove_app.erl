@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_remove_app).
+-module(epl_cmd_remove_app).
 
 %% API
 -export([run/2, spec/0, description/0]).

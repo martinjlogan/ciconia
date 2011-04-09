@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_managed).
+-module(epl_cmd_managed).
 
 %% API
 -export([run/1, spec/0, description/0]).
@@ -66,7 +66,7 @@ pretty_print_app(App, Rel, Options)
     ?INFO("~nApplications Under Management:~n", []),
     ?INFO("------------------------------~n", []),
     Records = epl_installed_info:all_apps(Options),
-    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
+    epl_cmd_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
 					    Records]);
 pretty_print_app(_App, _Rel, _Options) ->
     ok.
@@ -76,7 +76,7 @@ pretty_print_release(App, Rel, Options)
     ?INFO("~nReleases Under Management:~n", []),
     ?INFO("--------------------------~n", []),
     Records = epl_installed_info:all_releases(Options),
-    epl_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
+    epl_cmd_list:print_installed([{A, B} || #package_info{name = A, vsn = B} <-
 					    Records]);
 pretty_print_release(_App, _Rel, _Options) ->
     ok.

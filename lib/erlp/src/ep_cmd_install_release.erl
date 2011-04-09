@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(ep_install_release).
+-module(ep_cmd_install_release).
 
 %% API
 -export([run/2, spec/0, description/0]).
@@ -74,10 +74,10 @@ epl_install_release_run(RelPackagePath, Options) ->
     epl_install_release_run(RelPackagePath, Options, 2).
 
 epl_install_release_run(RelPackagePath, Options, 0) ->
-	epl_install_release:run(RelPackagePath, Options);
+	epl_cmd_install_release:run(RelPackagePath, Options);
 epl_install_release_run(RelPackagePath, Options, Count) ->
     try 
-	epl_install_release:run(RelPackagePath, Options)
+	epl_cmd_install_release:run(RelPackagePath, Options)
     catch
 	% ReleaseDir is used here because the compressed package 
 	% would have been uncompressed and staged by erlpl
@@ -103,7 +103,7 @@ install_missing_apps(RelPackagePath, MissingApps, Options) ->
     lists:map(fun({AppName, AppVsn}) ->
 		      ?DEBUG("The release is missing app ~p at version ~p~n" ++
 			     "Installing it now~n", [AppName, AppVsn]),
-		      ep_install_app:run(atom_to_list(AppName),
+		      ep_cmd_install_app:run(atom_to_list(AppName),
 					 [{version, AppVsn}|CleanOptions])
 	      end, MissingApps).
 
@@ -112,7 +112,7 @@ install_missing_erts(RelPackagePath, ErtsVsn, Options) ->
 		    lists:delete(root_dir, lists:delete(version, Options))],
     % TODO move to using ewl_plists map
     ?DEBUG("The release is missing erts~s. Installing it now~n", [ErtsVsn]),
-    ep_install_erts:run(ErtsVsn, CleanOptions).
+    ep_cmd_install_erts:run(ErtsVsn, CleanOptions).
 
 fetch_rel_binary([], _Options) ->
     throw(?UEX(rel_not_found,

@@ -12,7 +12,7 @@
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_install_app).
+-module(epl_cmd_install_erts).
 
 %% API
 -export([run/2, spec/0, description/0]).
@@ -24,47 +24,43 @@
 %%%===================================================================
 
 %%--------------------------------------------------------------------
-%% @doc Install an application.
-%% @spec (AppDir, Options) -> ok
+%% @doc Install an ertslication.
+%% @spec (ErtsDir, Options) -> ok
 %% where
 %%  Options = [Option]
 %%   Option = {force, bool()} 
 %% @end
 %%--------------------------------------------------------------------
-run(RawApp, Options) ->
-    AppDir = epl_util:unpack_to_tmp_if_archive(RawApp),
-    ?DEBUG("Unpacked application to ~p~n", [AppDir]),
+run(RawErts, Options) ->
+    ErtsDir = epl_util:unpack_to_tmp_if_archive(RawErts),
     Res = 
-	case epl_validation:app_validation(AppDir) of
+	case epl_validation:erts_validation(ErtsDir) of
 	    {error, Reason} ->
 		Msg = "Validation for ~s failed with ~p.~n" ++
-		    "Please verify that you have a well formed" ++
-		    " OTP Application~n",
-		Vars = [AppDir, Reason],
-		throw(?UEX({validation_of_app_failed, AppDir, Reason},
+		    "Please verify that you have a well formed ERTS package~n",
+		Vars = [ErtsDir, Reason],
+		throw(?UEX({validation_of_erts_failed, ErtsDir, Reason},
 			   Msg,
 			   Vars));
 	    true -> 
 		epl_installed_info:add_managed_root_dir(Options),
-		handle_install_app(AppDir, Options) 
+		handle_install_erts(ErtsDir, Options) 
 	end,
-    epl_file:remove(AppDir, [recursive]),
+    epl_file:remove(ErtsDir, [recursive]),
     Res.
 
 description() ->
-    "install an application package".
+    "Install an Erlang ERTS (Erlang Runtime System) package".
 
 -spec spec() -> get_opts_spec().
 spec() ->
     CmdLnTail = "<pkg_dir>",
-    OptionsTail = [{"pkg_dir",
-		    "path to the application package to be installed"}],
+    OptionsTail = [{"pkg_dir", "path to the ERTS package to be installed"}],
     OptionSpecs =
 	[
       %% {Name,   ShortOpt, LongOpt,        ArgSpec,               HelpMsg}
 	 {verbose, $v, "verbose", undefined, "Verbose output"},
-	 {root_dir, $d,  "root_dir", string, "The root dir for the install"},
-	 {version, $n,  "version", string, "App version number"},
+	 {root_dir, $d, "root_dir", string, "The root dir for the install"},
 	 {force, $f, "force", undefined,
 	  "Forces the command to run and eliminates all prompts"}
 	],
@@ -76,22 +72,22 @@ spec() ->
 %%% Internal Functions
 %%%---------------------------------------------------------
 
-handle_install_app(AppDir, Options) ->
+handle_install_erts(ErtsDir, Options) ->
     RootDir  = epl_util:get_option(root_dir, Options, spec(), required),
-    {AppName, AppVsn} = epl_otp_metadata_lib:app_name_and_vsn(AppDir),
-    InstalledAppDir   = epl_installed_paths:app_dir(RootDir, AppName, AppVsn),
+    {"erts", ErtsVsn} =
+	epl_otp_metadata_lib:package_dir_to_name_and_vsn(ErtsDir),
+    InstalledErtsDir   = epl_installed_paths:erts_dir(RootDir, ErtsVsn),
     Fun = fun() ->
-		  epl_installed_info:write(AppDir, Options),
-		  epl_install_driver:install_app(AppDir, RootDir)
+		  epl_installed_info:write(ErtsDir, Options),
+		  epl_install_driver:install_erts(ErtsDir, RootDir)
 	  end,
-    case filelib:is_dir(InstalledAppDir) of
+    case filelib:is_dir(InstalledErtsDir) of
 	false ->
 	   Fun();
 	true  ->
-	    Prompt = io_lib:fwrite("Do you want to overwrite ~s-~s (y/n)?",
-				   [AppName, AppVsn]), 
+	    Prompt = io_lib:fwrite("Do you want to overwrite erts-~s (y/n)?", [ErtsVsn]), 
 	    RespSet = ["y", "n"],
 	    SuccessSet = ["y"],
-	    epl_util:force_or_prompt_for_an_action(Prompt, RespSet,
-						   SuccessSet, Fun, Options) 
+	    epl_util:force_or_prompt_for_an_action(Prompt, RespSet, SuccessSet, Fun, Options) 
     end.
+

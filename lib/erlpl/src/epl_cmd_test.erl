@@ -2,11 +2,11 @@
 %%% @author Martin Logan <martinjlogan@Macintosh.local>
 %%% @copyright (C) 2010, Martin Logan
 %%% @doc
-%%%  Print the version of erlpl
+%%%  This is a test command. It is a dummy example.
 %%% @end
 %%% Created : 16 Jun 2010 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(epl_version).
+-module(epl_cmd_test).
 
 %% API
 -export([run/1, error/1, spec/0, description/0]).
@@ -22,19 +22,25 @@
 %% @end
 %%--------------------------------------------------------------------
 run(_Arg) ->
-    unimplemented.
+    ok.
 
 error(_Error) ->
     "who knows what happened?~n".
 
 description() ->
-    "print the current erlpl version".
+    "a dummy test command".
 
 -spec spec() -> get_opts_spec().
 spec() ->
+    Repo = "http://repo.erlware.org/pub",
     OptionSpecs =
 	[
       %% {Name,     ShortOpt,  LongOpt,        ArgSpec,               HelpMsg}
+	 {help,      $?,        "help",         undefined,             "Show erlp help"},
+	 {package,   $p,        "package",      string,                "Package name"},
+	 {version,   $v,        "version",      string,                "Package version"},
+	 {repo,      $r,        "repo",         {string, Repo},        "Repo URL"},
+	 {force,     $f,        "force",        {atom, false},         "Forces the command to run and eliminates all prompts"}
 	],
-    {OptionSpecs, "", ""}.
+    {OptionSpecs, undef, undef}.
 

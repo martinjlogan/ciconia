@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 20 Mar 2011 by Martin Logan <martinjlogan@Macintosh.local>
 %%%-------------------------------------------------------------------
--module(ep_help).
+-module(ep_cmd_help).
 
 %% API
 -export([run/1, error/1, spec/0, description/0]).
