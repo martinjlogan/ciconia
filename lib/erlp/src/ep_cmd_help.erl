@@ -30,15 +30,7 @@ run(Options) ->
     help_commands(epl_util:get_val(commands, Options), Options).
 
 help_commands(true, _Options) ->
-    ?INFO("This command is not yet implemented. Here is a basic~n" ++
-	  "list. Run erlp help --command <command> on each for~n" ++
-	  "more info on each command.~n~n" ++
-	  "  install-release~n" ++
-	  "  install-app~n" ++
-	  "  publish~n" ++
-	  "  update-cache~n" ++
-	  "  search~n" ++
-	  "  help~n~n", []);
+    epl_cmd_help:print_command_help(erlp);
 help_commands(_False, Options) ->
     help_command(epl_util:get_val(command, Options), Options).
 

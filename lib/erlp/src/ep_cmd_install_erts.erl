@@ -65,7 +65,7 @@ install_erts(ErtsVsn, Options) ->
     Info = select_erts_to_install(List),
     ErtsBinary = ep_install_util:fetch_binary(Info, Options),
     ErtsPackagePath = ep_install_util:write_out_package(Info, ErtsBinary),
-    epl_cmd_install_erts:run(ErtsPackagePath, Options).
+    epl_cm_install_erts:run(ErtsPackagePath, Options).
     %epl_file:remove(ErtsPackagePath, [recursive]). 
     
 

@@ -147,7 +147,7 @@ print_execution_failure_err_msg(Module, Args, Options, Exception) ->
 		   [CurrentFunction, Args, Line, ActualEx,
 		    erlang:get_stacktrace()]);
 	Exception ->
-	    ?DEBUG("~n~n***Debug Info***~n" +
+	    ?DEBUG("~n~n***Debug Info***~n" ++
 		   "Exception processed: ~p~n~nStackTrace:~p~n",
 		   [Exception, erlang:get_stacktrace()])
     end,
