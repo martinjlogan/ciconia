@@ -23,8 +23,9 @@
 ep_cache_fetch_ensure(PackageName, []) ->
     throw(?UEX(no_package_cache, "Can't install ~p:~n" ++
 	       "Package cache is either unreadable or not updated~n" ++
-	       "Try running 'erlp update_cache -r <repo_url>'.~n" ++
-	       "If that doesn't work check the permissions on your cache file.",
+	       "Try using 'update_cache -r <repo_url>'.~n" ++
+	       "If that doesn't work check the permissions on your" ++
+	       " cache file.",
 	       [PackageName]));
 ep_cache_fetch_ensure(_PackageName, List) ->
     List.
@@ -51,11 +52,10 @@ write_out_package(#package_info{name = Name, vsn = Vsn}, PackageBinary) ->
     write_data(PackageBinary, FilePath),
     FilePath.
 
-%%%-----------------------------------------------------------------------------
+%%%======================================================================
 %%% Internal functions
-%%%-----------------------------------------------------------------------------
+%%%======================================================================
 
-    
 write_data(Data, To) ->
     try
 	{ok, Fd} = file:open(To, [write, raw]),

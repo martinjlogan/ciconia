@@ -7,9 +7,15 @@ export ROOTDIR=$(dirname $PROG_DIR)
 
 #### Fill in values for these variables ####
 REL_NAME=ciconia
-REL_VSN=0.3.0
+REL_VSN=0.6.0
 ERTS_VSN=5.8.2
-INVOCATION_SUFFIX="-s epl_cmdln_lib apply_cmdln $0 $ROOTDIR ${ROOTDIR}/.erlp-meta epl_cmd -extra $@"
+INVOCATION_SUFFIX="-s epl_cmdln_lib apply_cmdln $0 $ROOTDIR ${ROOTDIR}/.erlp-meta cicl -extra $@"
 ###########################################
+
+if [ "$1" = "version" ];then        
+	echo $REL_VSN
+	exit 0
+fi
+
 
 $ROOTDIR/bin/ciconia_release_start_helper $REL_NAME $REL_VSN $ERTS_VSN sys.config -noshell $INVOCATION_SUFFIX

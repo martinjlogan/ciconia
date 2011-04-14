@@ -131,27 +131,26 @@ module_base_to_module(ModuleBase, Options) ->
     list_to_atom(Prefix ++ "_" ++ ModuleBase).
 
 print_execution_failure_err_msg(Module, Args, Options, Exception) ->
-    ?INFO("~n~n**Failure**~n", []),
+    ?INFO("~n**Failure: see below.~n", []),
     case Exception of
 	{uex, {CurrentFunction, Line, ActualEx, UsrMsg}} ->
-	    ?INFO("~n~n**Hint**~n~s~n~n", [UsrMsg]),
+	    ?INFO("~n**Hint**~n~s~n~n", [UsrMsg]),
 	    ?DEBUG("~n~n***Debug Info***~n" ++
 		   "Exception processed: in ~p ~p at ~p with~n" ++
 		   "~p~n~nStackTrace:~p~n",
 		   [CurrentFunction, Args, Line, ActualEx,
 		    erlang:get_stacktrace()]);
 	{ex, {CurrentFunction, Line, ActualEx}} ->
-	    ?DEBUG("~n~n***Debug Info***~n" ++
+	    ?DEBUG("~n***Debug Info***~n" ++
 		   "Exception processed: in ~p ~p at ~p with~n" ++
 		   "~p~n~nStackTrace:~p~n",
 		   [CurrentFunction, Args, Line, ActualEx,
 		    erlang:get_stacktrace()]);
 	Exception ->
-	    ?DEBUG("~n~n***Debug Info***~n" ++
+	    ?DEBUG("~n***Debug Info***~n" ++
 		   "Exception processed: ~p~n~nStackTrace:~p~n",
 		   [Exception, erlang:get_stacktrace()])
     end,
-    io:format("*********** module ~p~n", [Module]),
     print_usage(Module, Options),
     suggest_log_level().
 
@@ -257,6 +256,7 @@ help(Options) ->
     parse_args(["help"], Options).
 
 print_usage(Module, Options) ->
+    ?INFO("~n", []),
     {OptionSpecList, CmdLnTail, OptionsTail} = apply(Module, spec, []),
     ProgName = epl_util:get_option(prog_name, Options),
     Prefix = epl_util:get_option(prefix, Options),

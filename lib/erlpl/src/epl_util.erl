@@ -237,6 +237,7 @@ ask(Prompt, list, [H|_] = ResponseList) when is_list(H) ->
 dictafy(PackageList) ->
     dictafy(PackageList, dict:new()).
 
+%% XXX TODO delete this if no other function uses anymore.
 -spec dictafy(list() | tuple(), Dict::term()) -> term().
 dictafy(PkgInfo, Dict) when is_tuple(PkgInfo) ->
     dictafy([PkgInfo], Dict);

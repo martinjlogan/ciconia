@@ -13,9 +13,8 @@
 	 install_app/2,
 	 install_release/6,
 	 install_script_and_boot/3,
-	 install_config_file/3,
+	 install_config_file/2,
 	 install_erts/2,
-	 install_erts/3,
 	 install_executables/2
 	]).
 
@@ -44,7 +43,7 @@ install_app(AppDir, RootDir) ->
 %%  BaseDir>/lib/[applications]
 %%  BaseDir>/[optional_dirs]
 %% </pre>
-%% @spec (RelFile, ConfigFile, ExecutableFile, LibDirs, ErtsDir, RootDir) -> ok
+%% @spec (RelDir, ConfigFile, ExecutableFile, LibDirs, ErtsDir, RootDir) -> ok
 %% where
 %%  RelDir = string()
 %%  ConfigFile = string() | undefined
@@ -52,21 +51,24 @@ install_app(AppDir, RootDir) ->
 %%  LibDirs = [string()] | string()
 %%  ErtsDir = string() | undefined
 %%  RootDir = string() | undefined
-install_release(RelDir, ConfigFile, ExecutableFiles, LibDirs, ErtsDir, RootDir) ->
+install_release(RelDir, ConfigFile, ExecutableFiles,
+		LibDirs, ErtsDir, RootDir) ->
+    ?DEBUG("~p ~p ~p ~p ~p ~p~n", [RelDir, ConfigFile, ExecutableFiles,
+				   LibDirs, ErtsDir, RootDir]),
     RelFile   = epl_util:fetch_rel_file_from_release_package(RelDir),
     EbinPaths = install_apps(RelFile, LibDirs, RootDir),
-    install_script_and_boot(RootDir, RelFile, EbinPaths),
-    install_config_file(RootDir, RelFile, ConfigFile),
-    install_erts(RelFile, RootDir, ErtsDir),
-    install_executables(RootDir, ExecutableFiles).
+    install_script_and_boot(RelFile, EbinPaths, RootDir),
+    install_config_file(ConfigFile, RelFile),
+    install_erts(ErtsDir, RootDir),
+    install_executables(ExecutableFiles, RootDir).
 
 %% @doc Install a list of executable files
-%% @spec (RootDir, Executables) -> ok
+%% @spec (Executables, RootDir) -> ok
 %% where
 %%  Executables = [string()]
-install_executables(_RootDir, undefined) ->
+install_executables(undefined, _RootDir) ->
     ok;
-install_executables(RootDir, Executables) ->
+install_executables(Executables, RootDir) ->
     BinDir = epl_installed_paths:bin_dir(RootDir),
     try ewl_file:mkdir_p(BinDir)
     catch _:_ -> throw(?EX({mkdir_failed, BinDir})) end,
@@ -79,19 +81,9 @@ install_executables(RootDir, Executables) ->
       Executables).
 
 %% @doc Install erts
-%% @spec (RelFile, RootDir, ErtsDir) -> ok
-%% XXX TODO remove this - this is extra contract checking at the driver
-%% layer that probably can be moved to the policy layer.
-install_erts(_RelFile, _RootDir, undefined) ->
-    ok;
-install_erts(RelFile, RootDir, ErtsDir) ->
-    ErtsVsn = epl_otp_metadata_lib:consult_rel_file(erts_vsn, RelFile),
-    InstalledErtsDir2 = filename:join(RootDir, filename:basename(ErtsDir)), 
-    InstalledErtsDir  = epl_installed_paths:erts_dir(RootDir, ErtsVsn),
-    ok = compare_erts_vsns(InstalledErtsDir, InstalledErtsDir2),
-    install_erts(ErtsDir, RootDir).
-
 -spec install_erts(string(), string()) -> ok.
+install_erts(undefined, RootDir) ->
+    ok;
 install_erts(ErtsDir, RootDir) ->
     ?DEBUG("installing erts from ~s to ~s~n", [ErtsDir, RootDir]),
     {"erts", ErtsVsn} =
@@ -112,35 +104,26 @@ install_erts(ErtsDir, RootDir) ->
 	_:_ -> throw(?EX({failed_to_install_erts, ErtsDir, InstalledErtsDir}))
     end.
 
-compare_erts_vsns(InstalledErtsDir, InstalledErtsDir2) ->
-    compare_erts_vsns2(filename:basename(InstalledErtsDir),
-		       filename:basename(InstalledErtsDir2)).
-
-compare_erts_vsns2(InstalledErtsDir, InstalledErtsDir) ->
-    ok;
-compare_erts_vsns2(InstalledErtsDir, InstalledErtsDir2) ->
-    throw(?EX({mismatched_erts_vsns, InstalledErtsDir, InstalledErtsDir2})).
-    
-
 %% @doc Install a config file along with the release file it is
 %%      associated with.
-%% @spec (RootDir, RelFile, ConfigFile) -> ok
-install_config_file(_RootDir, _RelFile, undefined) ->
+-spec install_config_file(ConfigFile::string() | undefined,
+			  RelFile::string()) -> ok.
+install_config_file(undefined, _RelFile) ->
     ok;
-install_config_file(RootDir, RelFile, ConfigFile) ->
-    InstalledRelDir = installed_rel_dir(RelFile, RootDir),
-    InstalledConfigFile = filename:join(InstalledRelDir,
-					filename:basename(ConfigFile)),
+install_config_file(ConfigFile, RelFile) ->
+    ConfigFileName = filename:basename(ConfigFile),
+    ConfigDir = filename:dirname(RelFile),
+    InstalledConfigFile = filename:join(ConfigDir, ConfigFileName),
     try
 	ok = clean_copy_file(ConfigFile, InstalledConfigFile)
     catch
-	_:_ -> throw(?EX({copy_config_failed, RelFile, InstalledRelDir}))
+	_:_ -> throw(?EX({copy_config_failed, ConfigFile, ConfigDir}))
     end.
 
 %% @doc install script and boot files for a given rel file. EbinPaths
 %%      are all the ebin paths for the apps required by the .rel file.
 %% @spec (RootDir, RelFile, EbinPaths) -> ok
-install_script_and_boot(RootDir, RelFile, EbinPaths) ->
+install_script_and_boot(RelFile, EbinPaths, RootDir) ->
     [RelName, RelVsn] =
 	epl_otp_metadata_lib:consult_rel_file([name, vsn], RelFile),
     RelDir = filename:dirname(RelFile),

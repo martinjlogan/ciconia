@@ -9,7 +9,7 @@
 %% API
 -export([
 	 put/4,
-	 list/3,
+	 list/2,
 	 get/2
 	]).
 
@@ -22,20 +22,19 @@
 %% @doc this function is used to list out all data in a repo based
 %%      on a search criteria provided as a package info record.
 %%      This returns a list of package info records.
--spec list(record() | list(), [record()], non_neg_integer()) -> list().
-list([H|_] = RepoURL, _PackageInfos, Timeout) when is_integer(H) ->
+-spec list(record() | list(), non_neg_integer()) -> list().
+list([H|_] = RepoURL, Timeout) when is_integer(H) ->
     ?INFO("Pulling cache data from ~p~n" ++
 	  "** This may take up to a few minutes **~n",
 	  [RepoURL]), 
     get_package_infos(RepoURL, Timeout);
-list(Repos, PackageInfos, Timeout) when is_list(Repos) ->
+list(Repos, Timeout) when is_list(Repos) ->
     % XXX TODO changed to lists map for exception propagation.
     % This can change when pmap handles exceptions correctly.
     % this temp hack destroys timeouts.
     lists:foldl(fun(RepoURL, Acc) ->
-                      list(RepoURL, PackageInfos, Timeout) ++ Acc
+                      list(RepoURL, Timeout) ++ Acc
               end, [], Repos).
-
 
 %% @doc this function is used to get a package from the repo
 -spec get(record(), non_neg_integer()) -> term().

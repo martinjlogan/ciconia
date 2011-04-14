@@ -82,7 +82,7 @@ echo "Running: $CMD"
 $CMD
 check_errs $? "failed on updating the cache from the filesystem"
 
-CMD="$ROOT_DIR/bin/ciconia install-release -d ${ROOT_DIR}2 ciconia"
+CMD="$ROOT_DIR/bin/ciconia install-release -fd ${ROOT_DIR}2 ciconia"
 echo "\n***************"
 echo "Running: $CMD"
 $CMD
@@ -92,5 +92,29 @@ CMD="${ROOT_DIR}2/bin/ciclocal managed"
 echo "\n***************"
 echo "Running: $CMD"
 check_errs $? "failed on on displaying managed contents from ciconia installed from file based repo."
+
+CMD="$ROOT_DIR/bin/ciclocal remove-app -fd ${ROOT_DIR}2 ciconia"
+echo "\n***************"
+echo "Running: $CMD"
+$CMD
+check_errs $? "failed on removing the ciconia release"
+
+CMD="ls ${ROOT_DIR}2/lib |grep ciconia | wc -l | grep 0"
+echo "\n***************"
+echo "Running: $CMD"
+ls ${ROOT_DIR}2/lib | grep ciconia | wc -l | grep 0
+check_errs $? "failed to remove the ciconia application"
+
+CMD="$ROOT_DIR/bin/ciclocal remove-release -fd ${ROOT_DIR}2 ciconia"
+echo "\n***************"
+echo "Running: $CMD"
+$CMD
+check_errs $? "failed on removing the ciconia release"
+
+CMD="ls ${ROOT_DIR}2/lib | wc -l | grep 0"
+echo "\n***************"
+echo "Running: $CMD"
+ls ${ROOT_DIR}2/lib | wc -l | grep 0
+check_errs $? "failed to remove the ciconia release"
 
 rm -rf tmp

@@ -2,7 +2,7 @@
 %% application.
 {application, faxien_driver,
  [{description, "A driver for a webdav faxien style repo."},
-  {vsn, "0.3.0"},
+  {vsn, "0.5.0"},
   {modules, [
              faxien_driver,
              fd_repo_dav,
