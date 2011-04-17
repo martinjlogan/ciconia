@@ -37,7 +37,7 @@ list(Repos, Timeout) when is_list(Repos) ->
               end, [], Repos).
 
 %% @doc this function is used to get a package from the repo
--spec get(record(), non_neg_integer()) -> term().
+-spec get(record(), non_neg_integer()) -> binary().
 get(PackageInfo, Timeout) ->
     PackageURL = PackageInfo#package_info.path,
     try
