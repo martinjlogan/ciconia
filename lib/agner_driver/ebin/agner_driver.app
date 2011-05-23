@@ -7,6 +7,6 @@
              agner_driver
             ]},
   {registered,[]},
-  {applications, [kernel, stdlib, ewlib, erlware_commons]},
+  {applications, [kernel, stdlib, ewlib, erlware_commons, ibrowse, erlpl]},
   {start_phases, []}]}.
 

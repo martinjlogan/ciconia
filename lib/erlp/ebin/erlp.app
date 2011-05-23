@@ -9,6 +9,6 @@
              ep_cache
             ]},
   {registered,[]},
-  {applications, [kernel, stdlib, getopt, erlpl, ewlib, erlware_commons]},
+  {applications, [kernel, stdlib, getopt, erlpl, ewlib, erlware_commons, agner_driver]},
   {start_phases, []}]}.
 
